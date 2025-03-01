@@ -4,6 +4,8 @@
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 --
 
+with System;
+
 with A0B.Types.Arrays;
 
 package A0B.USB.Mass_Storage.UFI.Protocol
@@ -16,7 +18,7 @@ is
 
    TEST_UNIT_READY_Operation_Code              : constant := 16#00#;
    INQUIRY_Operation_Code                      : constant := 16#12#;
-   --  READ_CAPACITY_Operation_Code                : constant := 16#25#;
+   READ_CAPACITY_Operation_Code                : constant := 16#25#;
    --  Format Unit_Operation_Code                  : 04#
    --  Mode Select_Operation_Code                  : 55
    --  Mode Sense_Operation_Code                   : 5A
@@ -57,6 +59,28 @@ is
    --     Reserved_3            at 9 range 0 .. 7;
    --     Reserved_4            at 10 range 0 .. 7;
    --     Reserved_5            at 11 range 0 .. 7;
+   --  end record;
+
+   --  type Logical_Block_Address_Field is record
+   --     Value : A0B.Types.Unsigned_32;
+   --  end record
+   --    with Size                 => 32,
+   --         Bit_Order            => System.High_Order_First,
+   --         Scalar_Storage_Order => System.High_Order_First;
+   --
+   --  for Logical_Block_Address_Field use record
+   --     Value at 0 range 0 .. 31;
+   --  end record;
+   --
+   --  type Block_Length_In_Bytes_Field is record
+   --     Value : A0B.Types.Unsigned_32;
+   --  end record
+   --    with Size                 => 32,
+   --         Bit_Order            => System.High_Order_First,
+   --         Scalar_Storage_Order => System.High_Order_First;
+   --
+   --  for Block_Length_In_Bytes_Field use record
+   --     Value at 0 range 0 .. 31;
    --  end record;
 
    type Command_Block is record
@@ -167,6 +191,51 @@ is
       Vendor_Information     at 8 range 0 .. 8 * 8 - 1;
       Product_Identification at 16 range 0 .. 8 * 16 - 1;
       Product_Revision_Level at 32 range 0 .. 8 * 4 - 1;
+   end record;
+
+   type READ_CAPACITY_Command_Block is record
+      Operation_Code        : A0B.Types.Unsigned_8;
+      Logical_Unit_Number   : A0B.Types.Unsigned_3;
+      Reserved_1            : A0B.Types.Reserved_4;
+      RelAdr                : A0B.Types.Unsigned_1  := 0;
+      Logical_Block_Address : A0B.Types.Unsigned_32 := 0;
+      Reserved_6            : A0B.Types.Reserved_8;
+      Reserved_7            : A0B.Types.Reserved_8;
+      Reserved_8            : A0B.Types.Reserved_7;
+      PMI                   : A0B.Types.Unsigned_1  := 0;
+      Reserved_9            : A0B.Types.Reserved_8;
+      Reserved_10           : A0B.Types.Reserved_8;
+      Reserved_11           : A0B.Types.Reserved_8;
+   end record with Size => 8 * 12;
+
+   for READ_CAPACITY_Command_Block use record
+      Operation_Code        at 0 range 0 .. 7;
+      RelAdr                at 1 range 0 .. 0;
+      Reserved_1            at 1 range 1 .. 4;
+      Logical_Unit_Number   at 1 range 5 .. 7;
+      Logical_Block_Address at 2 range 0 .. 31;
+      Reserved_6            at 6 range 0 .. 7;
+      Reserved_7            at 7 range 0 .. 7;
+      PMI                   at 8 range 0 .. 0;
+      Reserved_8            at 8 range 1 .. 7;
+      Reserved_9            at 9 range 0 .. 7;
+      Reserved_10           at 10 range 0 .. 7;
+      Reserved_11           at 11 range 0 .. 7;
+   end record;
+
+   type READ_CAPACITY_Data_Block is record
+      --  Last_Logical_Block_Address : Logical_Block_Address_Field;
+      --  Block_Length_In_Bytes      : Block_Length_In_Bytes_Field;
+      Last_Logical_Block_Address : A0B.Types.Unsigned_32;
+      Block_Length_In_Bytes      : A0B.Types.Unsigned_32;
+   end record
+     with Size                 => 8 * 8,
+          Bit_Order            => System.High_Order_First,
+          Scalar_Storage_Order => System.High_Order_First;
+
+   for READ_CAPACITY_Data_Block use record
+      Last_Logical_Block_Address at 0 range 0 .. 31;
+      Block_Length_In_Bytes      at 4 range 0 .. 31;
    end record;
 
    type TEST_UNIT_READY_Command_Block is record
