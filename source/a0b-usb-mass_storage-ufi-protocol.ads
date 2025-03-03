@@ -7,6 +7,7 @@
 with System;
 
 with A0B.Types.Arrays;
+with A0B.Types.Big_Endian;
 
 package A0B.USB.Mass_Storage.UFI.Protocol
   with Pure, No_Elaboration_Code_All
@@ -36,53 +37,6 @@ is
    --  Write(12)_Operation_Code                    : AA
    --  Write and Verify_Operation_Code             : 2E
 
-   --  type Typical_Command_Block is record
-   --     Operation_Code        : A0B.Types.Unsigned_8;
-   --     Logical_Unit_Number   : A0B.Types.Unsigned_3;
-   --     Reserved_1            : A0B.Types.Unsigned_5;
-   --     Logical_Block_Address : A0B.Types.Unsigned_32;  --  MSB
-   --     Reserved_2            : A0B.Types.Unsigned_8;
-   --     --  Transfer or Parameter List or Allocation Length
-   --     Data                  : A0B.Types.Unsigned_16;  --  MSB
-   --     Reserved_3            : A0B.Types.Unsigned_8;
-   --     Reserved_4            : A0B.Types.Unsigned_8;
-   --     Reserved_5            : A0B.Types.Unsigned_8;
-   --  end record with Size => 8 * 12;
-   --
-   --  for Typical_Command_Block use record
-   --     Operation_Code        at 0 range 0 .. 7;
-   --     Reserved_1            at 1 range 0 .. 4;
-   --     Logical_Unit_Number   at 1 range 5 .. 7;
-   --     Logical_Block_Address at 2 range 0 .. 31;
-   --     Reserved_2            at 6 range 0 .. 7;
-   --     Data                  at 7 range 0 .. 15;
-   --     Reserved_3            at 9 range 0 .. 7;
-   --     Reserved_4            at 10 range 0 .. 7;
-   --     Reserved_5            at 11 range 0 .. 7;
-   --  end record;
-
-   --  type Logical_Block_Address_Field is record
-   --     Value : A0B.Types.Unsigned_32;
-   --  end record
-   --    with Size                 => 32,
-   --         Bit_Order            => System.High_Order_First,
-   --         Scalar_Storage_Order => System.High_Order_First;
-   --
-   --  for Logical_Block_Address_Field use record
-   --     Value at 0 range 0 .. 31;
-   --  end record;
-   --
-   --  type Block_Length_In_Bytes_Field is record
-   --     Value : A0B.Types.Unsigned_32;
-   --  end record
-   --    with Size                 => 32,
-   --         Bit_Order            => System.High_Order_First,
-   --         Scalar_Storage_Order => System.High_Order_First;
-   --
-   --  for Block_Length_In_Bytes_Field use record
-   --     Value at 0 range 0 .. 31;
-   --  end record;
-
    type Command_Block is record
       Operation_Code      : A0B.Types.Unsigned_8;
       Logical_Unit_Number : A0B.Types.Unsigned_3;
@@ -97,7 +51,9 @@ is
       Reserved_9          : A0B.Types.Reserved_8;
       Reserved_10         : A0B.Types.Reserved_8;
       Reserved_11         : A0B.Types.Reserved_8;
-   end record with Size => 8 * 12;
+   end record
+     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
 
    for Command_Block use record
       Operation_Code      at 0 range 0 .. 7;
@@ -130,7 +86,9 @@ is
       Reserved_9            : A0B.Types.Reserved_8;
       Reserved_10           : A0B.Types.Reserved_8;
       Reserved_11           : A0B.Types.Reserved_8;
-   end record with Size => 8 * 12;
+   end record
+     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
 
    for INQUIRY_Command_Block use record
       Operation_Code        at 0 range 0 .. 7;
@@ -172,7 +130,9 @@ is
       Vendor_Information     : Vendor_Information_Field;
       Product_Identification : Product_Identification_Field;
       Product_Revision_Level : Product_Revision_Level_Field;
-   end record with Size => 8 * 36;
+   end record
+     with Size      => 36 * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
 
    for INQUIRY_Data_Block use record
       Peripheral_Device_Type at 0 range 0 .. 4;
@@ -197,16 +157,18 @@ is
       Operation_Code        : A0B.Types.Unsigned_8;
       Logical_Unit_Number   : A0B.Types.Unsigned_3;
       Reserved_1            : A0B.Types.Reserved_4;
-      RelAdr                : A0B.Types.Unsigned_1  := 0;
-      Logical_Block_Address : A0B.Types.Unsigned_32 := 0;
+      RelAdr                : A0B.Types.Unsigned_1             := 0;
+      Logical_Block_Address : A0B.Types.Big_Endian.Unsigned_32 := (Value => 0);
       Reserved_6            : A0B.Types.Reserved_8;
       Reserved_7            : A0B.Types.Reserved_8;
       Reserved_8            : A0B.Types.Reserved_7;
-      PMI                   : A0B.Types.Unsigned_1  := 0;
+      PMI                   : A0B.Types.Unsigned_1             := 0;
       Reserved_9            : A0B.Types.Reserved_8;
       Reserved_10           : A0B.Types.Reserved_8;
       Reserved_11           : A0B.Types.Reserved_8;
-   end record with Size => 8 * 12;
+   end record
+     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
 
    for READ_CAPACITY_Command_Block use record
       Operation_Code        at 0 range 0 .. 7;
@@ -224,14 +186,11 @@ is
    end record;
 
    type READ_CAPACITY_Data_Block is record
-      --  Last_Logical_Block_Address : Logical_Block_Address_Field;
-      --  Block_Length_In_Bytes      : Block_Length_In_Bytes_Field;
-      Last_Logical_Block_Address : A0B.Types.Unsigned_32;
-      Block_Length_In_Bytes      : A0B.Types.Unsigned_32;
+      Last_Logical_Block_Address : A0B.Types.Big_Endian.Unsigned_32;
+      Block_Length_In_Bytes      : A0B.Types.Big_Endian.Unsigned_32;
    end record
-     with Size                 => 8 * 8,
-          Bit_Order            => System.High_Order_First,
-          Scalar_Storage_Order => System.High_Order_First;
+     with Size      => 8 * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
 
    for READ_CAPACITY_Data_Block use record
       Last_Logical_Block_Address at 0 range 0 .. 31;
@@ -252,7 +211,9 @@ is
       Reserved_9          : A0B.Types.Reserved_8;
       Reserved_10         : A0B.Types.Reserved_8;
       Reserved_11         : A0B.Types.Reserved_8;
-   end record with Size => 8 * 12;
+   end record
+     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
 
    for TEST_UNIT_READY_Command_Block use record
       Operation_Code        at 0 range 0 .. 7;
