@@ -9,7 +9,7 @@ with System;
 with A0B.Types.Arrays;
 with A0B.Types.Big_Endian;
 
-package A0B.USB.Mass_Storage.UFI.Protocol
+package A0B.USB.Mass_Storage.UFI.Types
   with Pure, No_Elaboration_Code_All
 is
 
@@ -510,4 +510,4 @@ is
       Reserved_11           at 11 range 0 .. 7;
    end record;
 
-end A0B.USB.Mass_Storage.UFI.Protocol;
+end A0B.USB.Mass_Storage.UFI.Types;
