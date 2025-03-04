@@ -1,5 +1,5 @@
 name = "a0b_usb_mass_storage_ufi"
-description = "A0B: USB Mass Storage UFI"
+description = "A0B: USB Mass Storage Class USB Floppy Interface"
 version = "0.1.0-dev"
 
 authors = ["Vadim Godunko"]
