@@ -9,7 +9,7 @@ with System;
 with A0B.Types.Arrays;
 with A0B.Types.Big_Endian;
 
-package A0B.USB.Mass_Storage.UFI.Types
+package A0B.USBMSC.UFI.Types
   with Pure, No_Elaboration_Code_All
 is
 
@@ -18,6 +18,7 @@ is
    --  type Operation_Code_Type is new A0B.Types.Unsigned_8;
 
    TEST_UNIT_READY_Operation_Code              : constant := 16#00#;
+   REQUEST_SENSE_Operation_Code                : constant := 16#03#;
    INQUIRY_Operation_Code                      : constant := 16#12#;
    READ_CAPACITY_Operation_Code                : constant := 16#25#;
    READ_10_Operation_Code                      : constant := 16#28#;
@@ -27,7 +28,6 @@ is
    --  Prevent-Allow Medium Removal_Operation_Code : 1E
    --  Read(12)_Operation_Code                     : A8
    --  Read Format Capacities_Operation_Code       : 23
-   --  Request Sense_Operation_Code                : 03
    --  Rezero_Operation_Code                       : 01
    --  Seek(10)_Operation_Code                     : 2B
    --  Send Diagnostic_Operation_Code              : 1D
@@ -36,6 +36,188 @@ is
    --  Write(10)_Operation_Code                    : 2A
    --  Write(12)_Operation_Code                    : AA
    --  Write and Verify_Operation_Code             : 2E
+
+   --  NO_SENSE_Sense_Key        : constant := 16#0#;
+   --  RECOVERED_ERROR_Sense_Key : constant := 16#1#;
+   --  NOT_READY_Sense_Key       : constant := 16#2#;
+   --  MEDIUM_ERROR_Sense_Key    : constant := 16#3#;
+   --  HARDWARE_ERROR_Sense_Key  : constant := 16#4#;
+   --  ILLEGAL_REQUEST_Sense_Key : constant := 16#5#;
+   --  UNIT_ATTENTION_Sense_Key  : constant := 16#6#;
+   --  DATA_PROTECT_Sense_Key    : constant := 16#7#;
+   --  BLANK_CHECK_Sense_Key     : constant := 16#8#;
+   --  ABORTED_COMMAND_Sense_Key : constant := 16#B#;
+   --  VOLUME_OVERFLOW_Sense_Key : constant := 16#D#;
+   --  MISCOMPARE_Sense_Key      : constant := 16#E#;
+
+   type Sense_Keys is record
+      Sense_Key                       : A0B.Types.Unsigned_4;
+      Additional_Sense_Code           : A0B.Types.Unsigned_8;
+      Additional_Sence_Code_Qualifier : A0B.Types.Unsigned_8;
+   end record;
+
+   NO_SENSE                  : constant Sense_Keys := (16#0#, 16#00#, 16#00#);
+   INVALID_COMMAND_OPERATION_CODE :
+                               constant Sense_Keys := (16#5#, 16#20#, 16#00#);
+
+--  Sense
+--  Key
+--  00
+--  01
+--  01
+--  02
+--  02
+--  02
+--  02
+--  02
+--  02
+--  02
+--  02
+--  02
+--  02
+--  02
+--  02
+--  03
+--  03
+--  03
+--  03
+--  03
+--  03
+--  03
+--  03
+--  03
+--  04
+--  05
+--  05
+--  05
+--  05
+--  05
+--  05
+--  05
+--  05
+--  05
+--  06
+--  ASCASCQ
+--  00
+--  17
+--  18
+--  04
+--  04
+--  04
+--  04
+--  06
+--  08
+--  08
+--  08
+--  3A
+--  54
+--  80
+--  FF
+--  02
+--  03
+--  10
+--  11
+--  12
+--  13
+--  14
+--  30
+--  31
+--  40
+--  1A
+--  20
+--  21
+--  24
+--  25
+--  26
+--  26
+--  26
+--  39
+--  2800
+--  01
+--  00
+--  01
+--  02
+--  04
+--  FF
+--  00
+--  00
+--  01
+--  80
+--  00
+--  00
+--  00
+--  FF
+--  00
+--  00
+--  00
+--  00
+--  00
+--  00
+--  00
+--  01
+--  01
+--  NN
+--  00
+--  00
+--  00
+--  00
+--  00
+--  00
+--  01
+--  02
+--  00
+--  00
+--  062900
+--  06
+--  07
+--  0B2F
+--  27
+--  4E00
+--  00
+--  00
+--  1999.01.05
+--  Description of Error
+--  NO SENSE
+--  RECOVERED DATA WITH RETRIES
+--  RECOVERED DATA WITH ECC
+--  LOGICAL DRIVE NOT READY - BECOMING READY
+--  LOGICAL DRIVE NOT READY - INITIALIZATION REQUIRED
+--  LOGICAL UNIT NOT READY - FORMAT IN PROGRESS
+--  LOGICAL DRIVE NOT READY - DEVICE IS BUSY
+--  NO REFERENCE POSITION FOUND
+--  LOGICAL UNIT COMMUNICATION FAILURE
+--  LOGICAL UNIT COMMUNICATION TIME-OUT
+--  LOGICAL UNIT COMMUNICATION OVERRUN
+--  MEDIUM NOT PRESENT
+--  USB TO HOST SYSTEM INTERFACE FAILURE
+--  INSUFFICIENT RESOURCES
+--  UNKNOWN ERROR
+--  NO SEEK COMPLETE
+--  WRITE FAULT
+--  ID CRC ERROR
+--  UNRECOVERED READ ERROR
+--  ADDRESS MARK NOT FOUND FOR ID FIELD
+--  ADDRESS MARK NOT FOUND FOR DATA FIELD
+--  RECORDED ENTITY NOT FOUND
+--  CANNOT READ MEDIUM - UNKNOWN FORMAT
+--  FORMAT COMMAND FAILED
+--  DIAGNOSTIC FAILURE ON COMPONENT NN (80H-FFH)
+--  PARAMETER LIST LENGTH ERROR
+--  INVALID COMMAND OPERATION CODE
+--  LOGICAL BLOCK ADDRESS OUT OF RANGE
+--  INVALID FIELD IN COMMAND PACKET
+--  LOGICAL UNIT NOT SUPPORTED
+--  INVALID FIELD IN PARAMETER LIST
+--  PARAMETER NOT SUPPORTED
+--  PARAMETER VALUE INVALID
+--  SAVING PARAMETERS NOT SUPPORT
+--  NOT READY TO READY TRANSITION - MEDIA
+--  CHANGED
+--  POWER ON RESET OR BUS DEVICE RESET
+--  OCCURRED
+--  COMMANDS CLEARED BY ANOTHER INITIATOR
+--  WRITE PROTECTED MEDIA
+--  OVERLAPPED COMMAND ATTEMPTED
 
    type Command_Block is record
       Operation_Code      : A0B.Types.Unsigned_8;
@@ -70,6 +252,87 @@ is
       Reserved_10         at 10 range 0 .. 7;
       Reserved_11         at 11 range 0 .. 7;
    end record;
+
+   --  REQUEST_SENSE (03)
+
+   type REQUEST_SENSE_Command_Block is record
+      Operation_Code      : A0B.Types.Unsigned_8 :=
+        REQUEST_SENSE_Operation_Code;
+      Logical_Unit_Number : A0B.Types.Unsigned_3;
+      Reserved_1          : A0B.Types.Reserved_5;
+      Reserved_2          : A0B.Types.Reserved_8;
+      Reserved_3          : A0B.Types.Reserved_8;
+      Allocation_Length   : A0B.Types.Unsigned_8;
+      Reserved_5          : A0B.Types.Reserved_8;
+      Reserved_6          : A0B.Types.Reserved_8;
+      Reserved_7          : A0B.Types.Reserved_8;
+      Reserved_8          : A0B.Types.Reserved_8;
+      Reserved_9          : A0B.Types.Reserved_8;
+      Reserved_10         : A0B.Types.Reserved_8;
+      Reserved_11         : A0B.Types.Reserved_8;
+   end record
+     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
+
+   for REQUEST_SENSE_Command_Block use record
+      Operation_Code      at 0 range 0 .. 7;
+      Reserved_1          at 1 range 0 .. 4;
+      Logical_Unit_Number at 1 range 5 .. 7;
+      Reserved_2          at 2 range 0 .. 7;
+      Reserved_3          at 3 range 0 .. 7;
+      Allocation_Length   at 4 range 0 .. 7;
+      Reserved_5          at 5 range 0 .. 7;
+      Reserved_6          at 6 range 0 .. 7;
+      Reserved_7          at 7 range 0 .. 7;
+      Reserved_8          at 8 range 0 .. 7;
+      Reserved_9          at 9 range 0 .. 7;
+      Reserved_10         at 10 range 0 .. 7;
+      Reserved_11         at 11 range 0 .. 7;
+   end record;
+
+   type REQUEST_SENSE_Data_Block is record
+      Valid                           : Boolean;
+      Error_Code                      : A0B.Types.Unsigned_7 := 16#70#;
+      Reserved_1                      : A0B.Types.Reserved_8;
+      Reserved_2                      : A0B.Types.Reserved_4;
+      Sense_Key                       : A0B.Types.Unsigned_4;
+      Information                     : A0B.Types.Big_Endian.Unsigned_32;
+      Additional_Sense_Length         : A0B.Types.Unsigned_8;
+      Reserved_8                      : A0B.Types.Reserved_8;
+      Reserved_9                      : A0B.Types.Reserved_8;
+      Reserved_10                     : A0B.Types.Reserved_8;
+      Reserved_11                     : A0B.Types.Reserved_8;
+      Additional_Sense_Code           : A0B.Types.Unsigned_8;
+      Additional_Sense_Code_Qualifier : A0B.Types.Unsigned_8;
+      Reserved_14                     : A0B.Types.Reserved_8;
+      Reserved_15                     : A0B.Types.Reserved_8;
+      Reserved_16                     : A0B.Types.Reserved_8;
+      Reserved_17                     : A0B.Types.Reserved_8;
+   end record
+     with Size      => 18 * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
+
+   for REQUEST_SENSE_Data_Block use record
+      Error_Code                      at 0 range 0 .. 6;
+      Valid                           at 0 range 7 .. 7;
+      Reserved_1                      at 1 range 0 .. 7;
+      Sense_Key                       at 2 range 0 .. 3;
+      Reserved_2                      at 2 range 4 .. 7;
+      Information                     at 3 range 0 .. 31;
+      Additional_Sense_Length         at 7 range 0 .. 7;
+      Reserved_8                      at 8 range 0 .. 7;
+      Reserved_9                      at 9 range 0 .. 7;
+      Reserved_10                     at 10 range 0 .. 7;
+      Reserved_11                     at 11 range 0 .. 7;
+      Additional_Sense_Code           at 12 range 0 .. 7;
+      Additional_Sense_Code_Qualifier at 13 range 0 .. 7;
+      Reserved_14                     at 14 range 0 .. 7;
+      Reserved_15                     at 15 range 0 .. 7;
+      Reserved_16                     at 16 range 0 .. 7;
+      Reserved_17                     at 17 range 0 .. 7;
+   end record;
+
+   --  INQUIRY (12)
 
    type INQUIRY_Command_Block is record
       Operation_Code        : A0B.Types.Unsigned_8 := INQUIRY_Operation_Code;
@@ -542,4 +805,4 @@ is
       Reserved_11           at 11 range 0 .. 7;
    end record;
 
-end A0B.USB.Mass_Storage.UFI.Types;
+end A0B.USBMSC.UFI.Types;

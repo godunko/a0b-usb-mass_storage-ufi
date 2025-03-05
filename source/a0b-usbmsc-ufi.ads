@@ -4,8 +4,10 @@
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 --
 
-package A0B.USB.Mass_Storage.UFI
+--  USB Mass Storage Class USB Floppy Interface
+
+package A0B.USBMSC.UFI
   with Pure, No_Elaboration_Code_All
 is
 
-end A0B.USB.Mass_Storage.UFI;
+end A0B.USBMSC.UFI;
