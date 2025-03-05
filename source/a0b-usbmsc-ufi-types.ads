@@ -13,14 +13,21 @@ package A0B.USBMSC.UFI.Types
   with Pure, No_Elaboration_Code_All
 is
 
-   subtype Command_Buffer is A0B.Types.Arrays.Unsigned_8_Array (0 .. 11);
+   use type A0B.Types.Unsigned_32;
 
-   --  type Operation_Code_Type is new A0B.Types.Unsigned_8;
+   Command_Block_Length : constant := 12;
+   --  Command_Block_Size   : constant :=
+   --    Command_Block_Length * A0B.Types.Unsigned_8'Size;
 
-   TEST_UNIT_READY_Operation_Code              : constant := 16#00#;
+   subtype Command_Buffer is
+     A0B.Types.Arrays.Unsigned_8_Array (0 .. Command_Block_Length - 1);
+
+   type Operation_Code is new A0B.Types.Unsigned_8;
+
+   TEST_UNIT_READY_Operation_Code         : constant Operation_Code := 16#00#;
    REQUEST_SENSE_Operation_Code                : constant := 16#03#;
-   INQUIRY_Operation_Code                      : constant := 16#12#;
-   READ_CAPACITY_Operation_Code                : constant := 16#25#;
+   INQUIRY_Operation_Code                 : constant Operation_Code := 16#12#;
+   READ_CAPACITY_Operation_Code           : constant Operation_Code := 16#25#;
    READ_10_Operation_Code                      : constant := 16#28#;
    MODE_SENSE_Operation_Code                   : constant := 16#5A#;
    --  Format Unit_Operation_Code                  : 04#
@@ -220,7 +227,7 @@ is
 --  OVERLAPPED COMMAND ATTEMPTED
 
    type Command_Block is record
-      Operation_Code      : A0B.Types.Unsigned_8;
+      Operation_Code      : Types.Operation_Code;
       Logical_Unit_Number : A0B.Types.Unsigned_3;
       Reserved_1          : A0B.Types.Reserved_5;
       Reserved_2          : A0B.Types.Reserved_8;
@@ -234,7 +241,7 @@ is
       Reserved_10         : A0B.Types.Reserved_8;
       Reserved_11         : A0B.Types.Reserved_8;
    end record
-     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+     with Size      => Command_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for Command_Block use record
@@ -335,39 +342,39 @@ is
    --  INQUIRY (12)
 
    type INQUIRY_Command_Block is record
-      Operation_Code        : A0B.Types.Unsigned_8 := INQUIRY_Operation_Code;
-      Logical_Unit_Number   : A0B.Types.Unsigned_3;
-      Reserved_1            : A0B.Types.Reserved_4;
-      EVPD                  : A0B.Types.Unsigned_1 := 0;
-      Page_Code             : A0B.Types.Unsigned_8 := 0;
-      Reserved_3            : A0B.Types.Reserved_8;
-      Allocation_Length     : A0B.Types.Unsigned_8;
-      Reserved_5            : A0B.Types.Reserved_8;
-      Reserved_6            : A0B.Types.Reserved_8;
-      Reserved_7            : A0B.Types.Reserved_8;
-      Reserved_8            : A0B.Types.Reserved_8;
-      Reserved_9            : A0B.Types.Reserved_8;
-      Reserved_10           : A0B.Types.Reserved_8;
-      Reserved_11           : A0B.Types.Reserved_8;
+      Operation_Code            : Types.Operation_Code := INQUIRY_Operation_Code;
+      Logical_Unit_Number       : A0B.Types.Unsigned_3;
+      Reserved_1                : A0B.Types.Reserved_4;
+      Enable_Vital_Product_Data : A0B.Types.Unsigned_1 := 0;
+      Page_Code                 : A0B.Types.Unsigned_8 := 0;
+      Reserved_3                : A0B.Types.Reserved_8;
+      Allocation_Length         : A0B.Types.Unsigned_8;
+      Reserved_5                : A0B.Types.Reserved_8;
+      Reserved_6                : A0B.Types.Reserved_8;
+      Reserved_7                : A0B.Types.Reserved_8;
+      Reserved_8                : A0B.Types.Reserved_8;
+      Reserved_9                : A0B.Types.Reserved_8;
+      Reserved_10               : A0B.Types.Reserved_8;
+      Reserved_11               : A0B.Types.Reserved_8;
    end record
-     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+     with Size      => Command_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for INQUIRY_Command_Block use record
-      Operation_Code        at 0 range 0 .. 7;
-      EVPD                  at 1 range 0 .. 0;
-      Reserved_1            at 1 range 1 .. 4;
-      Logical_Unit_Number   at 1 range 5 .. 7;
-      Page_Code             at 2 range 0 .. 7;
-      Reserved_3            at 3 range 0 .. 7;
-      Allocation_Length     at 4 range 0 .. 7;
-      Reserved_5            at 5 range 0 .. 7;
-      Reserved_6            at 6 range 0 .. 7;
-      Reserved_7            at 7 range 0 .. 7;
-      Reserved_8            at 8 range 0 .. 7;
-      Reserved_9            at 9 range 0 .. 7;
-      Reserved_10           at 10 range 0 .. 7;
-      Reserved_11           at 11 range 0 .. 7;
+      Operation_Code            at 0 range 0 .. 7;
+      Enable_Vital_Product_Data at 1 range 0 .. 0;
+      Reserved_1                at 1 range 1 .. 4;
+      Logical_Unit_Number       at 1 range 5 .. 7;
+      Page_Code                 at 2 range 0 .. 7;
+      Reserved_3                at 3 range 0 .. 7;
+      Allocation_Length         at 4 range 0 .. 7;
+      Reserved_5                at 5 range 0 .. 7;
+      Reserved_6                at 6 range 0 .. 7;
+      Reserved_7                at 7 range 0 .. 7;
+      Reserved_8                at 8 range 0 .. 7;
+      Reserved_9                at 9 range 0 .. 7;
+      Reserved_10               at 10 range 0 .. 7;
+      Reserved_11               at 11 range 0 .. 7;
    end record;
 
    type Vendor_Information_Field is array (0 .. 7) of Character;
@@ -376,10 +383,12 @@ is
 
    type Product_Revision_Level_Field is array (0 .. 3) of Character;
 
+   INQUIRY_Data_Block_Length : constant := 36;
+
    type INQUIRY_Data_Block is record
       Reserved_1             : A0B.Types.Reserved_3 := A0B.Types.Zero;
       Peripheral_Device_Type : A0B.Types.Unsigned_5;
-      RMB                    : Boolean;
+      Removable_Media_Bit    : Boolean;
       Reserved_2             : A0B.Types.Reserved_7 := A0B.Types.Zero;
       ISO_Version            : A0B.Types.Unsigned_2 := 0;
       ECMA_Version           : A0B.Types.Unsigned_3 := 0;
@@ -394,14 +403,14 @@ is
       Product_Identification : Product_Identification_Field;
       Product_Revision_Level : Product_Revision_Level_Field;
    end record
-     with Size      => 36 * A0B.Types.Unsigned_8'Size,
+     with Size      => INQUIRY_Data_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for INQUIRY_Data_Block use record
       Peripheral_Device_Type at 0 range 0 .. 4;
       Reserved_1             at 0 range 5 .. 7;
       Reserved_2             at 1 range 0 .. 6;
-      RMB                    at 1 range 7 .. 7;
+      Removable_Media_Bit    at 1 range 7 .. 7;
       ANSI_Version           at 2 range 0 .. 2;
       ECMA_Version           at 2 range 3 .. 5;
       ISO_Version            at 2 range 6 .. 7;
@@ -728,7 +737,8 @@ is
    end record;
 
    type READ_CAPACITY_Command_Block is record
-      Operation_Code        : A0B.Types.Unsigned_8;
+      Operation_Code        : Types.Operation_Code             :=
+        READ_CAPACITY_Operation_Code;
       Logical_Unit_Number   : A0B.Types.Unsigned_3;
       Reserved_1            : A0B.Types.Reserved_4;
       RelAdr                : A0B.Types.Unsigned_1             := 0;
@@ -741,7 +751,7 @@ is
       Reserved_10           : A0B.Types.Reserved_8;
       Reserved_11           : A0B.Types.Reserved_8;
    end record
-     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+     with Size      => Command_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for READ_CAPACITY_Command_Block use record
@@ -759,11 +769,14 @@ is
       Reserved_11           at 11 range 0 .. 7;
    end record;
 
+   READ_CAPACITY_Data_Block_Length : constant := 8;
+
    type READ_CAPACITY_Data_Block is record
       Last_Logical_Block_Address : A0B.Types.Big_Endian.Unsigned_32;
       Block_Length_In_Bytes      : A0B.Types.Big_Endian.Unsigned_32;
    end record
-     with Size      => 8 * A0B.Types.Unsigned_8'Size,
+     with Size      =>
+            READ_CAPACITY_Data_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for READ_CAPACITY_Data_Block use record
