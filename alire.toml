@@ -6,7 +6,7 @@ authors = ["Vadim Godunko"]
 maintainers = ["Vadim Godunko <vgodunko@gmail.com>"]
 maintainers-logins = ["godunko"]
 licenses = "Apache-2.0 WITH LLVM-exception"
-tags = ["a0b", "embedded", "usb", "mass_storage", "ufi"]
+tags = ["a0b", "embedded", "usb", "mass-storage", "ufi"]
 
 project-files = ["gnat/a0b_usb_mass_storage_ufi.gpr"]
 
@@ -16,4 +16,4 @@ generate_c = false
 generate_gpr = true
 
 [[depends-on]]
-a0b_base = "*"
+a0b_usb_mass_storage_bbb = "*"
