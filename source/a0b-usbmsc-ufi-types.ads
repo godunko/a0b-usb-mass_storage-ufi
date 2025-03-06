@@ -27,12 +27,13 @@ is
    TEST_UNIT_READY_Operation_Code         : constant Operation_Code := 16#00#;
    REQUEST_SENSE_Operation_Code                : constant := 16#03#;
    INQUIRY_Operation_Code                 : constant Operation_Code := 16#12#;
+   PREVENT_ALLOW_MEDIUM_REMOVAL_Operation_Code :
+                                            constant Operation_Code := 16#1E#;
    READ_CAPACITY_Operation_Code           : constant Operation_Code := 16#25#;
    READ_10_Operation_Code                      : constant := 16#28#;
    MODE_SENSE_Operation_Code              : constant Operation_Code := 16#5A#;
    --  Format Unit_Operation_Code                  : 04#
    --  Mode Select_Operation_Code                  : 55
-   --  Prevent-Allow Medium Removal_Operation_Code : 1E
    --  Read(12)_Operation_Code                     : A8
    --  Read Format Capacities_Operation_Code       : 23
    --  Rezero_Operation_Code                       : 01
@@ -66,125 +67,11 @@ is
    NO_SENSE                  : constant Sense_Keys := (16#0#, 16#00#, 16#00#);
    INVALID_COMMAND_OPERATION_CODE :
                                constant Sense_Keys := (16#5#, 16#20#, 16#00#);
+   INVALID_FIELD_IN_COMMAND_PACKET :
+                               constant Sense_Keys := (16#5#, 16#24#, 16#00#);
+   OVERLAPPED_COMMAND_ATTEMPTED :
+                               constant Sense_Keys := (16#B#, 16#4E#, 16#00#);
 
---  Sense
---  Key
---  00
---  01
---  01
---  02
---  02
---  02
---  02
---  02
---  02
---  02
---  02
---  02
---  02
---  02
---  02
---  03
---  03
---  03
---  03
---  03
---  03
---  03
---  03
---  03
---  04
---  05
---  05
---  05
---  05
---  05
---  05
---  05
---  05
---  05
---  06
---  ASCASCQ
---  00
---  17
---  18
---  04
---  04
---  04
---  04
---  06
---  08
---  08
---  08
---  3A
---  54
---  80
---  FF
---  02
---  03
---  10
---  11
---  12
---  13
---  14
---  30
---  31
---  40
---  1A
---  20
---  21
---  24
---  25
---  26
---  26
---  26
---  39
---  2800
---  01
---  00
---  01
---  02
---  04
---  FF
---  00
---  00
---  01
---  80
---  00
---  00
---  00
---  FF
---  00
---  00
---  00
---  00
---  00
---  00
---  00
---  01
---  01
---  NN
---  00
---  00
---  00
---  00
---  00
---  00
---  01
---  02
---  00
---  00
---  062900
---  06
---  07
---  0B2F
---  27
---  4E00
---  00
---  00
---  1999.01.05
---  Description of Error
---  NO SENSE
 --  RECOVERED DATA WITH RETRIES
 --  RECOVERED DATA WITH ECC
 --  LOGICAL DRIVE NOT READY - BECOMING READY
@@ -212,7 +99,6 @@ is
 --  PARAMETER LIST LENGTH ERROR
 --  INVALID COMMAND OPERATION CODE
 --  LOGICAL BLOCK ADDRESS OUT OF RANGE
---  INVALID FIELD IN COMMAND PACKET
 --  LOGICAL UNIT NOT SUPPORTED
 --  INVALID FIELD IN PARAMETER LIST
 --  PARAMETER NOT SUPPORTED
@@ -224,7 +110,6 @@ is
 --  OCCURRED
 --  COMMANDS CLEARED BY ANOTHER INITIATOR
 --  WRITE PROTECTED MEDIA
---  OVERLAPPED COMMAND ATTEMPTED
 
    type Command_Block is record
       Operation_Code      : Types.Operation_Code;
@@ -729,6 +614,47 @@ is
       Timer_And_Protect                 : Timer_And_Protect_Page_Block;
    end record
      with Size => Mode_Parameter_List_Length * A0B.Types.Unsigned_8'Size;
+
+   --  PREVENT_ALLOW_MEDIUM_REMOVAL
+
+   type PREVENT_ALLOW_MEDIUM_REMOVAL_Command_Block is record
+      Operation_Code      : Types.Operation_Code :=
+        PREVENT_ALLOW_MEDIUM_REMOVAL_Operation_Code;
+      Logical_Unit_Number : A0B.Types.Unsigned_3;
+      Reserved_1          : A0B.Types.Reserved_5;
+      Reserved_2          : A0B.Types.Reserved_8;
+      Reserved_3          : A0B.Types.Reserved_8;
+      Reserved_4          : A0B.Types.Reserved_7;
+      Prevent             : Boolean;
+      Reserved_5          : A0B.Types.Reserved_8;
+      Reserved_6          : A0B.Types.Reserved_8;
+      Reserved_7          : A0B.Types.Reserved_8;
+      Reserved_8          : A0B.Types.Reserved_8;
+      Reserved_9          : A0B.Types.Reserved_8;
+      Reserved_10         : A0B.Types.Reserved_8;
+      Reserved_11         : A0B.Types.Reserved_8;
+   end record
+     with Size      => Command_Block_Length * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
+
+   for PREVENT_ALLOW_MEDIUM_REMOVAL_Command_Block use record
+      Operation_Code      at 0 range 0 .. 7;
+      Reserved_1          at 1 range 0 .. 4;
+      Logical_Unit_Number at 1 range 5 .. 7;
+      Reserved_2          at 2 range 0 .. 7;
+      Reserved_3          at 3 range 0 .. 7;
+      Prevent             at 4 range 0 .. 0;
+      Reserved_4          at 4 range 1 .. 7;
+      Reserved_5          at 5 range 0 .. 7;
+      Reserved_6          at 6 range 0 .. 7;
+      Reserved_7          at 7 range 0 .. 7;
+      Reserved_8          at 8 range 0 .. 7;
+      Reserved_9          at 9 range 0 .. 7;
+      Reserved_10         at 10 range 0 .. 7;
+      Reserved_11         at 11 range 0 .. 7;
+   end record;
+
+   --  READ_10
 
    type READ_10_Command_Block is record
       Operation_Code        : A0B.Types.Unsigned_8;
