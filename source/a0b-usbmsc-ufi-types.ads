@@ -30,7 +30,7 @@ is
    PREVENT_ALLOW_MEDIUM_REMOVAL_Operation_Code :
                                             constant Operation_Code := 16#1E#;
    READ_CAPACITY_Operation_Code           : constant Operation_Code := 16#25#;
-   READ_10_Operation_Code                      : constant := 16#28#;
+   READ_10_Operation_Code                 : constant Operation_Code := 16#28#;
    MODE_SENSE_Operation_Code              : constant Operation_Code := 16#5A#;
    --  Format Unit_Operation_Code                  : 04#
    --  Mode Select_Operation_Code                  : 55
@@ -618,7 +618,7 @@ is
    end record
      with Size => Mode_Parameter_List_Length * A0B.Types.Unsigned_8'Size;
 
-   --  PREVENT_ALLOW_MEDIUM_REMOVAL
+   --  PREVENT_ALLOW_MEDIUM_REMOVAL (1E)
 
    type PREVENT_ALLOW_MEDIUM_REMOVAL_Command_Block is record
       Operation_Code      : Types.Operation_Code :=
@@ -657,39 +657,7 @@ is
       Reserved_11         at 11 range 0 .. 7;
    end record;
 
-   --  READ_10
-
-   type READ_10_Command_Block is record
-      Operation_Code        : A0B.Types.Unsigned_8;
-      Logical_Unit_Number   : A0B.Types.Unsigned_3;
-      DPO                   : A0B.Types.Unsigned_1 := 0;
-      FUA                   : A0B.Types.Unsigned_1 := 0;
-      Reserved_1            : A0B.Types.Reserved_2;
-      RelAdr                : A0B.Types.Unsigned_1 := 0;
-      Logical_Block_Address : A0B.Types.Big_Endian.Unsigned_32;
-      Reserved_6            : A0B.Types.Reserved_8;
-      Transfer_Length       : A0B.Types.Big_Endian.Unsigned_16;
-      Reserved_9            : A0B.Types.Reserved_8;
-      Reserved_10           : A0B.Types.Reserved_8;
-      Reserved_11           : A0B.Types.Reserved_8;
-   end record
-     with Size      => 12 * A0B.Types.Unsigned_8'Size,
-          Bit_Order => System.Low_Order_First;
-
-   for READ_10_Command_Block use record
-      Operation_Code        at 0 range 0 .. 7;
-      RelAdr                at 1 range 0 .. 0;
-      Reserved_1            at 1 range 1 .. 2;
-      FUA                   at 1 range 3 .. 3;
-      DPO                   at 1 range 4 .. 4;
-      Logical_Unit_Number   at 1 range 5 .. 7;
-      Logical_Block_Address at 2 range 0 .. 31;
-      Reserved_6            at 6 range 0 .. 7;
-      Transfer_Length       at 7 range 0 .. 15;
-      Reserved_9            at 9 range 0 .. 7;
-      Reserved_10           at 10 range 0 .. 7;
-      Reserved_11           at 11 range 0 .. 7;
-   end record;
+   --  READ_CAPACITY (25)
 
    type READ_CAPACITY_Command_Block is record
       Operation_Code        : Types.Operation_Code             :=
@@ -738,6 +706,42 @@ is
       Last_Logical_Block_Address at 0 range 0 .. 31;
       Block_Length_In_Bytes      at 4 range 0 .. 31;
    end record;
+
+   --  READ_10 (28)
+
+   type READ_10_Command_Block is record
+      Operation_Code        : Types.Operation_Code := READ_10_Operation_Code;
+      Logical_Unit_Number   : A0B.Types.Unsigned_3;
+      DPO                   : A0B.Types.Unsigned_1 := 0;
+      FUA                   : A0B.Types.Unsigned_1 := 0;
+      Reserved_1            : A0B.Types.Reserved_2;
+      RelAdr                : A0B.Types.Unsigned_1 := 0;
+      Logical_Block_Address : A0B.Types.Big_Endian.Unsigned_32;
+      Reserved_6            : A0B.Types.Reserved_8;
+      Transfer_Length       : A0B.Types.Big_Endian.Unsigned_16;
+      Reserved_9            : A0B.Types.Reserved_8;
+      Reserved_10           : A0B.Types.Reserved_8;
+      Reserved_11           : A0B.Types.Reserved_8;
+   end record
+     with Size      => Command_Block_Length * A0B.Types.Unsigned_8'Size,
+          Bit_Order => System.Low_Order_First;
+
+   for READ_10_Command_Block use record
+      Operation_Code        at 0 range 0 .. 7;
+      RelAdr                at 1 range 0 .. 0;
+      Reserved_1            at 1 range 1 .. 2;
+      FUA                   at 1 range 3 .. 3;
+      DPO                   at 1 range 4 .. 4;
+      Logical_Unit_Number   at 1 range 5 .. 7;
+      Logical_Block_Address at 2 range 0 .. 31;
+      Reserved_6            at 6 range 0 .. 7;
+      Transfer_Length       at 7 range 0 .. 15;
+      Reserved_9            at 9 range 0 .. 7;
+      Reserved_10           at 10 range 0 .. 7;
+      Reserved_11           at 11 range 0 .. 7;
+   end record;
+
+   --  TEST_UNIT_READY (00)
 
    type TEST_UNIT_READY_Command_Block is record
       Operation_Code      : A0B.Types.Unsigned_8;
