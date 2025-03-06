@@ -25,7 +25,7 @@ is
    type Operation_Code is new A0B.Types.Unsigned_8;
 
    TEST_UNIT_READY_Operation_Code         : constant Operation_Code := 16#00#;
-   REQUEST_SENSE_Operation_Code                : constant := 16#03#;
+   REQUEST_SENSE_Operation_Code           : constant Operation_Code := 16#03#;
    INQUIRY_Operation_Code                 : constant Operation_Code := 16#12#;
    PREVENT_ALLOW_MEDIUM_REMOVAL_Operation_Code :
                                             constant Operation_Code := 16#1E#;
@@ -148,7 +148,7 @@ is
    --  REQUEST_SENSE (03)
 
    type REQUEST_SENSE_Command_Block is record
-      Operation_Code      : A0B.Types.Unsigned_8 :=
+      Operation_Code      : Types.Operation_Code :=
         REQUEST_SENSE_Operation_Code;
       Logical_Unit_Number : A0B.Types.Unsigned_3;
       Reserved_1          : A0B.Types.Reserved_5;
@@ -163,7 +163,7 @@ is
       Reserved_10         : A0B.Types.Reserved_8;
       Reserved_11         : A0B.Types.Reserved_8;
    end record
-     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+     with Size      => Command_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for REQUEST_SENSE_Command_Block use record
@@ -182,6 +182,8 @@ is
       Reserved_11         at 11 range 0 .. 7;
    end record;
 
+   REQUEST_SENSE_Data_Block_Length : constant := 18;
+
    type REQUEST_SENSE_Data_Block is record
       Valid                           : Boolean;
       Error_Code                      : A0B.Types.Unsigned_7 := 16#70#;
@@ -189,7 +191,7 @@ is
       Reserved_2                      : A0B.Types.Reserved_4;
       Sense_Key                       : A0B.Types.Unsigned_4;
       Information                     : A0B.Types.Big_Endian.Unsigned_32;
-      Additional_Sense_Length         : A0B.Types.Unsigned_8;
+      Additional_Sense_Length         : A0B.Types.Unsigned_8 := 16#10#;
       Reserved_8                      : A0B.Types.Reserved_8;
       Reserved_9                      : A0B.Types.Reserved_8;
       Reserved_10                     : A0B.Types.Reserved_8;
@@ -201,7 +203,8 @@ is
       Reserved_16                     : A0B.Types.Reserved_8;
       Reserved_17                     : A0B.Types.Reserved_8;
    end record
-     with Size      => 18 * A0B.Types.Unsigned_8'Size,
+     with Size      =>
+            REQUEST_SENSE_Data_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for REQUEST_SENSE_Data_Block use record
