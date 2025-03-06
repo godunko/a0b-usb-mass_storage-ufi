@@ -29,7 +29,7 @@ is
    INQUIRY_Operation_Code                 : constant Operation_Code := 16#12#;
    READ_CAPACITY_Operation_Code           : constant Operation_Code := 16#25#;
    READ_10_Operation_Code                      : constant := 16#28#;
-   MODE_SENSE_Operation_Code                   : constant := 16#5A#;
+   MODE_SENSE_Operation_Code              : constant Operation_Code := 16#5A#;
    --  Format Unit_Operation_Code                  : 04#
    --  Mode Select_Operation_Code                  : 55
    --  Prevent-Allow Medium Removal_Operation_Code : 1E
@@ -433,10 +433,11 @@ is
    All_Pages                              : constant := 16#3F#;
 
    type MODE_SENSE_Command_Block is record
-      Operation_Code           : A0B.Types.Unsigned_8;
+      Operation_Code           : Types.Operation_Code :=
+        MODE_SENSE_Operation_Code;
       Logical_Unit_Number      : A0B.Types.Unsigned_3;
       Reserved_1_4_4           : A0B.Types.Reserved_1;
-      Disable_Block_Descriptor : Boolean := False;
+      Disable_Block_Descriptor : Boolean              := False;
       Reserved_1_0_2           : A0B.Types.Reserved_1;
       Page_Control             : A0B.Types.Unsigned_2;
       Page_Code                : A0B.Types.Unsigned_6;
@@ -449,7 +450,7 @@ is
       Reserved_10              : A0B.Types.Reserved_8;
       Reserved_11              : A0B.Types.Reserved_8;
    end record
-     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+     with Size      => Command_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for MODE_SENSE_Command_Block use record
@@ -470,6 +471,8 @@ is
       Reserved_11              at 11 range 0 .. 7;
    end record;
 
+   Mode_Parameter_Header_Block_Length : constant := 8;
+
    type Mode_Parameter_Header_Block is record
       Mode_Data_Length : A0B.Types.Big_Endian.Unsigned_16 := (Value => 0);
       Medium_Type_Code : A0B.Types.Unsigned_8;
@@ -482,7 +485,8 @@ is
       Reserved_6       : A0B.Types.Reserved_8;
       Reserved_7       : A0B.Types.Reserved_8;
    end record
-     with Size      => 8 * A0B.Types.Unsigned_8'Size,
+     with Size      =>
+            Mode_Parameter_Header_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for Mode_Parameter_Header_Block use record
@@ -497,6 +501,8 @@ is
       Reserved_6       at 6 range 0 .. 7;
       Reserved_7       at 7 range 0 .. 7;
    end record;
+
+   Read_Write_Error_Recovery_Page_Block_Length : constant := 12;
 
    type Read_Write_Error_Recovery_Page_Block is record
       Parameters_Savable                  : A0B.Types.Unsigned_1 := 0;
@@ -520,7 +526,9 @@ is
       Reserved_10                         : A0B.Types.Reserved_8;
       Reserved_11                         : A0B.Types.Reserved_8;
    end record
-     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+     with Size      =>
+            Read_Write_Error_Recovery_Page_Block_Length
+              * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for Read_Write_Error_Recovery_Page_Block use record
@@ -544,6 +552,8 @@ is
       Reserved_10                         at 10 range 0 .. 7;
       Reserved_11                         at 11 range 0 .. 7;
    end record;
+
+   Flexible_Disk_Page_Block_Length : constant := 32;
 
    type Flexible_Disk_Page_Block is record
       Parameters_Savable    : A0B.Types.Unsigned_1 := 0;
@@ -577,7 +587,8 @@ is
       Reserved_30           : A0B.Types.Reserved_8;
       Reserved_31           : A0B.Types.Reserved_8;
    end record
-     with Size      => 32 * A0B.Types.Unsigned_8'Size,
+     with Size      =>
+            Flexible_Disk_Page_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for Flexible_Disk_Page_Block use record
@@ -613,6 +624,8 @@ is
       Reserved_31           at 31 range 0 .. 7;
    end record;
 
+   Removable_Block_Access_Capabilities_Page_Block_Length : constant := 12;
+
    type Removable_Block_Access_Capabilities_Page_Block is record
       Parameters_Savable                 : A0B.Types.Unsigned_1 := 0;
       Reserved_0                         : A0B.Types.Reserved_1;
@@ -635,7 +648,9 @@ is
       Reserved_10                        : A0B.Types.Reserved_8;
       Reserved_11                        : A0B.Types.Reserved_8;
    end record
-     with Size      => 12 * A0B.Types.Unsigned_8'Size,
+     with Size      =>
+            Removable_Block_Access_Capabilities_Page_Block_Length
+              * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for  Removable_Block_Access_Capabilities_Page_Block use record
@@ -660,6 +675,8 @@ is
       Reserved_11                        at 11 range 0 .. 7;
    end record;
 
+   Timer_And_Protect_Page_Block_Length : constant := 8;
+
    type Timer_And_Protect_Page_Block is record
       Parameters_Savable                 : A0B.Types.Unsigned_1 := 0;
       Reserved_0                         : A0B.Types.Reserved_1;
@@ -676,7 +693,8 @@ is
       Reserved_6                         : A0B.Types.Reserved_8;
       Reserved_7                         : A0B.Types.Reserved_8;
    end record
-     with Size      => 8 * A0B.Types.Unsigned_8'Size,
+     with Size      =>
+            Timer_And_Protect_Page_Block_Length * A0B.Types.Unsigned_8'Size,
           Bit_Order => System.Low_Order_First;
 
    for Timer_And_Protect_Page_Block use record
@@ -695,6 +713,13 @@ is
       Reserved_7                         at 7 range 0 .. 7;
    end record;
 
+   Mode_Parameter_List_Length : constant :=
+     Mode_Parameter_Header_Block_Length
+       + Read_Write_Error_Recovery_Page_Block_Length
+       + Flexible_Disk_Page_Block_Length
+       + Removable_Block_Access_Capabilities_Page_Block_Length
+       + Timer_And_Protect_Page_Block_Length;
+
    type Mode_Parameter_List is record
       Header                            : Mode_Parameter_Header_Block;
       Read_Write_Error_Recovery         : Read_Write_Error_Recovery_Page_Block;
@@ -702,7 +727,8 @@ is
       Removable_Block_Access_Capacities :
         Removable_Block_Access_Capabilities_Page_Block;
       Timer_And_Protect                 : Timer_And_Protect_Page_Block;
-   end record with Size => 72 * A0B.Types.Unsigned_8'Size;
+   end record
+     with Size => Mode_Parameter_List_Length * A0B.Types.Unsigned_8'Size;
 
    type READ_10_Command_Block is record
       Operation_Code        : A0B.Types.Unsigned_8;
